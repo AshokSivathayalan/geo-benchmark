@@ -4,24 +4,38 @@ download_images.py — Fetch street-level images from the Mapillary API.
 Downloads images for a specified set of geographic coordinates or image IDs,
 saves them to data/images/, and appends rows to data/annotations.csv.
 
+The Graph API images search endpoint requires OAuth user tokens and returns
+empty results with client tokens. This script uses the Vector Tiles API
+(which works with client tokens) to find image IDs near coordinates, then
+fetches thumbnail URLs via the Graph API.
+
 Usage:
-    python scripts/download_images.py --coords coords.csv --output data/images/ --limit 50
+    python scripts/download_images.py --coords coords.csv --output data/images/ --limit 3
     python scripts/download_images.py --image-ids ids.txt --output data/images/
 """
 
 import argparse
 import csv
 import logging
+import math
 import os
 import time
 from pathlib import Path
 from typing import Optional
 
+import mapbox_vector_tile
 import requests
+from dotenv import load_dotenv
+
+# Load .env from project root (one level up from scripts/)
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 logger = logging.getLogger(__name__)
 
 MAPILLARY_API_BASE = "https://graph.mapillary.com"
+MAPILLARY_TILE_BASE = "https://tiles.mapillary.com/maps/vtp/mly1_public/2"
+TILE_ZOOM = 14
+TILE_EXTENT = 4096  # MVT default extent
 
 ANNOTATIONS_FIELDNAMES = [
     "id", "filepath", "country", "cue_type", "multi_cue", "cue_notes", "region"
@@ -48,61 +62,185 @@ def get_mapillary_token() -> str:
     return token
 
 
+# ---------------------------------------------------------------------------
+# Tile coordinate math
+# ---------------------------------------------------------------------------
+
+def lat_lon_to_tile(lat: float, lon: float, zoom: int = TILE_ZOOM) -> tuple[int, int]:
+    """
+    Convert a lat/lon coordinate to slippy map tile indices at a given zoom level.
+
+    Args:
+        lat: Latitude in degrees.
+        lon: Longitude in degrees.
+        zoom: Tile zoom level.
+
+    Returns:
+        (tile_x, tile_y) integer tile indices.
+    """
+    lat_rad = math.radians(lat)
+    n = 2 ** zoom
+    tile_x = int((lon + 180) / 360 * n)
+    tile_y = int((1 - math.log(math.tan(lat_rad) + 1 / math.cos(lat_rad)) / math.pi) / 2 * n)
+    return tile_x, tile_y
+
+
+def tile_pixel_to_lat_lon(
+    tile_x: int, tile_y: int, px: float, py: float, zoom: int = TILE_ZOOM
+) -> tuple[float, float]:
+    """
+    Convert tile-local pixel coordinates back to lat/lon.
+
+    Args:
+        tile_x: Tile column index.
+        tile_y: Tile row index.
+        px: Pixel x within tile (0–TILE_EXTENT).
+        py: Pixel y within tile (0–TILE_EXTENT).
+        zoom: Tile zoom level.
+
+    Returns:
+        (lat, lon) in degrees.
+    """
+    n = 2 ** zoom
+    lon = (tile_x + px / TILE_EXTENT) / n * 360 - 180
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * (tile_y + py / TILE_EXTENT) / n)))
+    lat = math.degrees(lat_rad)
+    return lat, lon
+
+
+def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """
+    Compute the great-circle distance in metres between two lat/lon points.
+
+    Args:
+        lat1, lon1: First point in degrees.
+        lat2, lon2: Second point in degrees.
+
+    Returns:
+        Distance in metres.
+    """
+    R = 6_371_000  # Earth radius in metres
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+# ---------------------------------------------------------------------------
+# Vector tile image search
+# ---------------------------------------------------------------------------
+
+def fetch_tile(tile_x: int, tile_y: int, token: str) -> bytes:
+    """
+    Download a Mapillary vector tile as raw protobuf bytes.
+
+    Args:
+        tile_x: Tile column index at TILE_ZOOM.
+        tile_y: Tile row index at TILE_ZOOM.
+        token: Mapillary API token.
+
+    Returns:
+        Raw protobuf bytes of the tile.
+
+    Raises:
+        requests.HTTPError: On non-200 response.
+    """
+    url = f"{MAPILLARY_TILE_BASE}/{TILE_ZOOM}/{tile_x}/{tile_y}"
+    response = requests.get(url, params={"access_token": token}, timeout=30)
+    response.raise_for_status()
+    return response.content
+
+
 def search_images_near(
     lat: float,
     lon: float,
-    radius_m: int = 100,
+    radius_m: int = 500,
     limit: int = 5,
     token: str = "",
 ) -> list[dict]:
     """
-    Search for Mapillary images near a given coordinate.
+    Find Mapillary image IDs near a coordinate using the vector tiles API.
+
+    Fetches the tile covering the target coordinate, parses image features,
+    filters by haversine distance, and returns the closest ones.
 
     Args:
-        lat: Latitude of the search center.
-        lon: Longitude of the search center.
-        radius_m: Search radius in meters.
-        limit: Maximum number of results to return.
+        lat: Target latitude.
+        lon: Target longitude.
+        radius_m: Search radius in metres.
+        limit: Maximum number of images to return.
         token: Mapillary API token.
 
     Returns:
-        List of image metadata dicts from the Mapillary API.
+        List of dicts with keys 'id', 'lat', 'lon', 'distance_m'.
     """
-    url = f"{MAPILLARY_API_BASE}/images"
-    params = {
-        "access_token": token,
-        "fields": "id,thumb_2048_url,geometry,captured_at",
-        "closeto": f"{lon},{lat}",
-        "radius": radius_m,
-        "limit": limit,
-    }
-    response = requests.get(url, params=params, timeout=15)
-    response.raise_for_status()
-    data = response.json()
-    return data.get("data", [])
+    tile_x, tile_y = lat_lon_to_tile(lat, lon)
+    logger.debug(f"Fetching tile z={TILE_ZOOM} x={tile_x} y={tile_y}")
+
+    tile_bytes = fetch_tile(tile_x, tile_y, token)
+    tile_data = mapbox_vector_tile.decode(tile_bytes)
+
+    image_layer = tile_data.get("image", {})
+    features = image_layer.get("features", [])
+    logger.debug(f"Tile contains {len(features)} image features")
+
+    candidates = []
+    for feature in features:
+        geom = feature.get("geometry", {})
+        coords = geom.get("coordinates")
+        props = feature.get("properties", {})
+        image_id = props.get("id")
+
+        if not coords or not image_id:
+            continue
+
+        # Point geometry: coordinates is [px, py]
+        if geom.get("type") == "Point":
+            px, py = coords
+        else:
+            continue
+
+        img_lat, img_lon = tile_pixel_to_lat_lon(tile_x, tile_y, px, py)
+        dist = haversine_m(lat, lon, img_lat, img_lon)
+
+        if dist <= radius_m:
+            candidates.append({
+                "id": image_id,
+                "lat": img_lat,
+                "lon": img_lon,
+                "distance_m": dist,
+            })
+
+    candidates.sort(key=lambda c: c["distance_m"])
+    return candidates[:limit]
 
 
-def fetch_image_url(image_id: str, token: str) -> Optional[str]:
+# ---------------------------------------------------------------------------
+# Graph API: fetch thumbnail URL for a known image ID
+# ---------------------------------------------------------------------------
+
+def fetch_image_url(image_id: str | int, token: str) -> Optional[str]:
     """
-    Fetch the thumbnail URL for a specific Mapillary image ID.
+    Fetch the 2048px thumbnail URL for a specific Mapillary image ID.
 
     Args:
         image_id: Mapillary image identifier.
         token: Mapillary API token.
 
     Returns:
-        URL string for a 2048px thumbnail, or None if unavailable.
+        Thumbnail URL string, or None if unavailable.
     """
     url = f"{MAPILLARY_API_BASE}/{image_id}"
-    params = {
-        "access_token": token,
-        "fields": "id,thumb_2048_url",
-    }
+    params = {"access_token": token, "fields": "id,thumb_2048_url"}
     response = requests.get(url, params=params, timeout=15)
     response.raise_for_status()
-    data = response.json()
-    return data.get("thumb_2048_url")
+    return response.json().get("thumb_2048_url")
 
+
+# ---------------------------------------------------------------------------
+# Image download
+# ---------------------------------------------------------------------------
 
 def download_image(image_url: str, dest_path: Path, max_retries: int = 3) -> bool:
     """
@@ -194,11 +332,11 @@ def download_from_coords(
     """
     Download images for each (lat, lon, country, region) row in a CSV file.
 
-    The coords CSV must have columns: lat, lon, country, region.
-    Cue type and notes must be filled in manually after download.
+    Uses the vector tiles API to find nearby image IDs, then fetches their
+    thumbnail URLs via the Graph API.
 
     Args:
-        coords_path: Path to the coordinates CSV.
+        coords_path: Path to the coordinates CSV (columns: lat, lon, country, region).
         output_dir: Directory to save downloaded images.
         annotations_path: Path to the annotations CSV to append to.
         limit_per_coord: Maximum images to download per coordinate.
@@ -219,28 +357,41 @@ def download_from_coords(
         logger.info(f"Searching near ({lat:.4f}, {lon:.4f}) — {country}...")
 
         try:
-            images = search_images_near(lat, lon, limit=limit_per_coord, token=token)
+            candidates = search_images_near(lat, lon, radius_m=500, limit=limit_per_coord, token=token)
         except Exception as e:
-            logger.error(f"Search failed for ({lat}, {lon}): {e}")
+            logger.error(f"Tile search failed for ({lat}, {lon}): {e}")
             continue
 
-        for img in images:
-            image_id = img.get("id")
-            img_url = img.get("thumb_2048_url")
+        if not candidates:
+            logger.warning(f"No images found within 500m of ({lat:.4f}, {lon:.4f}). Skipping.")
+            continue
 
-            if not image_id or not img_url:
-                continue
+        logger.info(f"Found {len(candidates)} candidate(s) — fetching thumbnail URLs...")
 
+        for candidate in candidates:
+            image_id = str(candidate["id"])
             dest_filename = f"{image_id}.jpg"
             dest_path = output_dir / dest_filename
             rel_path = f"data/images/{dest_filename}"
 
             if dest_path.exists():
                 logger.info(f"Already downloaded: {dest_filename}")
-            else:
-                success = download_image(img_url, dest_path)
-                if not success:
-                    continue
+                downloaded += 1
+                continue
+
+            try:
+                img_url = fetch_image_url(image_id, token)
+            except Exception as e:
+                logger.error(f"Failed to fetch URL for {image_id}: {e}")
+                continue
+
+            if not img_url:
+                logger.warning(f"No thumbnail URL for {image_id}.")
+                continue
+
+            success = download_image(img_url, dest_path)
+            if not success:
+                continue
 
             append_annotation(
                 annotations_path,
@@ -250,7 +401,10 @@ def download_from_coords(
                 region=region,
             )
             downloaded += 1
-            logger.info(f"Saved: {dest_filename} ({downloaded} total)")
+            logger.info(
+                f"Saved: {dest_filename} | {country} | {candidate['distance_m']:.0f}m from target "
+                f"({downloaded} total)"
+            )
 
     logger.info(f"Done. {downloaded} images downloaded.")
 
@@ -317,7 +471,7 @@ def main() -> None:
     source_group.add_argument(
         "--coords",
         type=Path,
-        help="CSV with columns lat, lon, country, region. Images are searched near each coordinate.",
+        help="CSV with columns lat, lon, country, region.",
     )
     source_group.add_argument(
         "--image-ids",
