@@ -1,0 +1,11 @@
+id,filepath,country,cue_type,multi_cue,cue_notes,region
+img_001,data/images/img_001.jpg,Japan,linguistic,False,"Kanji/hiragana on storefront signs and vending machines","East Asia"
+img_002,data/images/img_002.jpg,Brazil,environmental,False,"Dense tropical vegetation, red laterite soil visible on roadside","South America"
+img_003,data/images/img_003.jpg,United Kingdom,infrastructure,False,"Left-hand traffic, yellow road markings, distinct UK road sign style","Western Europe"
+img_004,data/images/img_004.jpg,France,linguistic,True,"French text on road signs; also Haussmann-style architecture","Western Europe"
+img_005,data/images/img_005.jpg,Australia,infrastructure,False,"Left-hand driving, Australian road signage style with green background","Oceania"
+img_006,data/images/img_006.jpg,Russia,linguistic,False,"Cyrillic script on shop signs and street names","Eastern Europe"
+img_007,data/images/img_007.jpg,Kenya,environmental,False,"Savanna grassland, acacia trees, dry red soil","Sub-Saharan Africa"
+img_008,data/images/img_008.jpg,United States,infrastructure,False,"Right-hand traffic, US-style green highway signs, fire hydrant visible","North America"
+img_009,data/images/img_009.jpg,Thailand,linguistic,True,"Thai script on signs; also tuk-tuks and Buddhist temple architecture","Southeast Asia"
+img_010,data/images/img_010.jpg,Norway,environmental,False,"Fjord landscape, conifer forests, Nordic wooden architecture","Northern Europe"
