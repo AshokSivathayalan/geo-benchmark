@@ -81,10 +81,18 @@ def parse_country(raw_response: str) -> str:
         logger.warning("Empty or non-string response received.")
         return "PARSE_ERROR"
 
-    for line in raw_response.splitlines():
+    lines = raw_response.splitlines()
+    for i, line in enumerate(lines):
         stripped = line.strip()
         if stripped.upper().startswith("COUNTRY:"):
             country_raw = stripped[len("COUNTRY:"):].strip()
+            # If the country is on the next line (e.g. "COUNTRY:\nThailand")
+            if not country_raw:
+                for j in range(i + 1, len(lines)):
+                    next_line = lines[j].strip()
+                    if next_line:
+                        country_raw = next_line
+                        break
             if not country_raw:
                 logger.warning("COUNTRY: line found but value is empty.")
                 return "PARSE_ERROR"

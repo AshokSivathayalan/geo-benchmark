@@ -6,7 +6,7 @@ Sends street-level images to a VLM and records country predictions.
 Usage:
     python scripts/evaluate.py --model claude --input data/annotations.csv --output results/results_claude.csv
     python scripts/evaluate.py --model gpt4o --input data/annotations.csv --output results/results_gpt4o.csv
-    python scripts/evaluate.py --model llava --input data/annotations.csv --output results/results_openweight.csv
+    python scripts/evaluate.py --model gemini --input data/annotations.csv --output results/results_gemini.csv
     python scripts/evaluate.py --model claude --input data/annotations.csv --output results/results_claude.csv --pilot 10
 """
 
@@ -20,6 +20,9 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 from parse_results import parse_country, is_correct
 
@@ -42,7 +45,12 @@ COUNTRY: <single country name only>"""
 SUPPORTED_MODELS = {
     "claude": "claude-sonnet-4-20250514",
     "gpt4o": "gpt-4o",
-    "llava": "meta-llama/Llama-Vision-Free",  # Together AI endpoint
+    "gemini": "gemini-2.5-flash",
+}
+
+# Minimum seconds between requests per model (to respect rate limits)
+RATE_LIMITS = {
+    "gemini": 12.0,  # 5 RPM = 12s between requests
 }
 
 RESULTS_FIELDNAMES = [
@@ -188,13 +196,13 @@ def call_gpt4o(image_b64: str, model_id: str, max_retries: int = 3) -> str:
     raise RuntimeError("Unreachable")  # pragma: no cover
 
 
-def call_openweight(image_b64: str, model_id: str, max_retries: int = 3) -> str:
+def call_gemini(image_b64: str, model_id: str, max_retries: int = 3) -> str:
     """
-    Query an open-weight vision model via the Together AI API.
+    Query the Google Gemini API with a base64-encoded image.
 
     Args:
         image_b64: Base64-encoded JPEG image string.
-        model_id: Together AI model identifier.
+        model_id: Gemini model identifier.
         max_retries: Maximum number of retry attempts on transient errors.
 
     Returns:
@@ -203,43 +211,31 @@ def call_openweight(image_b64: str, model_id: str, max_retries: int = 3) -> str:
     Raises:
         RuntimeError: If all retries are exhausted.
     """
-    import openai  # Together AI uses OpenAI-compatible API
+    from google import genai
+    from google.genai import types
 
-    api_key = os.environ.get("TOGETHER_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise EnvironmentError("TOGETHER_API_KEY environment variable not set.")
+        raise EnvironmentError("GEMINI_API_KEY environment variable not set.")
 
-    client = openai.OpenAI(
-        api_key=api_key,
-        base_url="https://api.together.xyz/v1",
-    )
+    client = genai.Client(api_key=api_key)
+    image_bytes = base64.b64decode(image_b64)
 
     for attempt in range(1, max_retries + 1):
         try:
-            response = client.chat.completions.create(
+            response = client.models.generate_content(
                 model=model_id,
-                max_tokens=1024,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{image_b64}",
-                                },
-                            },
-                            {"type": "text", "text": EVALUATION_PROMPT},
-                        ],
-                    }
+                contents=[
+                    types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+                    EVALUATION_PROMPT,
                 ],
             )
-            return response.choices[0].message.content
+            return response.text
         except Exception as e:
             wait = 2 ** attempt
-            logger.warning(f"Together AI error (attempt {attempt}/{max_retries}): {e}. Retrying in {wait}s...")
+            logger.warning(f"Gemini API error (attempt {attempt}/{max_retries}): {e}. Retrying in {wait}s...")
             if attempt == max_retries:
-                raise RuntimeError(f"Together AI API failed after {max_retries} attempts: {e}") from e
+                raise RuntimeError(f"Gemini API failed after {max_retries} attempts: {e}") from e
             time.sleep(wait)
 
     raise RuntimeError("Unreachable")  # pragma: no cover
@@ -254,7 +250,7 @@ def query_model(model_key: str, image_b64: str) -> str:
     Dispatch a model query to the appropriate API caller.
 
     Args:
-        model_key: One of 'claude', 'gpt4o', or 'llava'.
+        model_key: One of 'claude', 'gpt4o', or 'gemini'.
         image_b64: Base64-encoded JPEG image string.
 
     Returns:
@@ -265,8 +261,8 @@ def query_model(model_key: str, image_b64: str) -> str:
         return call_claude(image_b64, model_id)
     elif model_key == "gpt4o":
         return call_gpt4o(image_b64, model_id)
-    elif model_key == "llava":
-        return call_openweight(image_b64, model_id)
+    elif model_key == "gemini":
+        return call_gemini(image_b64, model_id)
     else:
         raise ValueError(f"Unsupported model key: {model_key}")
 
@@ -342,9 +338,19 @@ def run_evaluation(
                 correct = False
             else:
                 try:
+                    request_start = time.time()
                     raw_response = query_model(model_key, image_b64)
                     predicted_country = parse_country(raw_response)
                     correct = is_correct(predicted_country, row["country"])
+
+                    # Respect per-model rate limits
+                    cooldown = RATE_LIMITS.get(model_key, 0)
+                    if cooldown > 0:
+                        elapsed = time.time() - request_start
+                        wait_time = cooldown - elapsed
+                        if wait_time > 0:
+                            logger.info(f"Rate limit: waiting {wait_time:.1f}s...")
+                            time.sleep(wait_time)
                 except Exception as e:
                     logger.error(f"[{image_id}] Model query failed: {e}")
                     raw_response = f"API_ERROR: {e}"
@@ -389,7 +395,7 @@ def estimate_cost(model_key: str, num_images: int) -> None:
         model_key: Model being evaluated.
         num_images: Total number of images to be processed.
     """
-    cost_per_image = {"claude": 0.02, "gpt4o": 0.02, "llava": 0.002}
+    cost_per_image = {"claude": 0.02, "gpt4o": 0.02, "gemini": 0.001}
     estimate = cost_per_image.get(model_key, 0.02) * num_images
     print(f"Estimated cost for {num_images} images with '{model_key}': ~${estimate:.2f}")
     print("(Run with --pilot 10 first to verify before a full run.)")
@@ -407,7 +413,7 @@ def main() -> None:
         "--model",
         required=True,
         choices=list(SUPPORTED_MODELS.keys()),
-        help="Model to evaluate: claude, gpt4o, or llava.",
+        help="Model to evaluate: claude, gpt4o, or gemini.",
     )
     parser.add_argument(
         "--input",

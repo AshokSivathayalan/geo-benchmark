@@ -220,22 +220,27 @@ def search_images_near(
 # Graph API: fetch thumbnail URL for a known image ID
 # ---------------------------------------------------------------------------
 
-def fetch_image_url(image_id: str | int, token: str) -> Optional[str]:
+def fetch_image_url(image_id: str | int, token: str, skip_pano: bool = True) -> Optional[str]:
     """
     Fetch the 2048px thumbnail URL for a specific Mapillary image ID.
 
     Args:
         image_id: Mapillary image identifier.
         token: Mapillary API token.
+        skip_pano: If True, return None for panoramic/360° images.
 
     Returns:
-        Thumbnail URL string, or None if unavailable.
+        Thumbnail URL string, or None if unavailable or panoramic.
     """
     url = f"{MAPILLARY_API_BASE}/{image_id}"
-    params = {"access_token": token, "fields": "id,thumb_2048_url"}
+    params = {"access_token": token, "fields": "id,thumb_2048_url,is_pano"}
     response = requests.get(url, params=params, timeout=15)
     response.raise_for_status()
-    return response.json().get("thumb_2048_url")
+    data = response.json()
+    if skip_pano and data.get("is_pano", False):
+        logger.info(f"Skipping panoramic image: {image_id}")
+        return None
+    return data.get("thumb_2048_url")
 
 
 # ---------------------------------------------------------------------------
@@ -357,7 +362,8 @@ def download_from_coords(
         logger.info(f"Searching near ({lat:.4f}, {lon:.4f}) — {country}...")
 
         try:
-            candidates = search_images_near(lat, lon, radius_m=500, limit=limit_per_coord, token=token)
+            # Fetch extra candidates to compensate for panoramas being skipped
+            candidates = search_images_near(lat, lon, radius_m=500, limit=limit_per_coord * 2, token=token)
         except Exception as e:
             logger.error(f"Tile search failed for ({lat}, {lon}): {e}")
             continue
@@ -368,11 +374,16 @@ def download_from_coords(
 
         logger.info(f"Found {len(candidates)} candidate(s) — fetching thumbnail URLs...")
 
+        saved_this_coord = 0
         for candidate in candidates:
+            if saved_this_coord >= limit_per_coord:
+                break
             image_id = str(candidate["id"])
             dest_filename = f"{image_id}.jpg"
-            dest_path = output_dir / dest_filename
-            rel_path = f"data/images/{dest_filename}"
+            country_dir = output_dir / country
+            country_dir.mkdir(parents=True, exist_ok=True)
+            dest_path = country_dir / dest_filename
+            rel_path = f"data/images/{country}/{dest_filename}"
 
             if dest_path.exists():
                 logger.info(f"Already downloaded: {dest_filename}")
@@ -401,6 +412,7 @@ def download_from_coords(
                 region=region,
             )
             downloaded += 1
+            saved_this_coord += 1
             logger.info(
                 f"Saved: {dest_filename} | {country} | {candidate['distance_m']:.0f}m from target "
                 f"({downloaded} total)"
@@ -460,6 +472,89 @@ def download_from_ids(
 
 
 # ---------------------------------------------------------------------------
+# Batch download from images.txt (structured format with countries/cue types)
+# ---------------------------------------------------------------------------
+
+COUNTRY_FOLDER_MAP = {
+    "UK": "United Kingdom",
+}
+
+
+def parse_images_txt(path: Path) -> list[tuple[str, str]]:
+    """
+    Parse images.txt and return a list of (image_id, country_folder_name) tuples.
+    """
+    lines = path.read_text().splitlines()
+    entries = []
+    current_country = None
+
+    cue_headers = {"Linguistic", "Environmental", "Infrastructural", "Multi-Cue"}
+
+    for line in lines:
+        line = line.strip()
+        if not line or line in cue_headers:
+            continue
+
+        # If no digits, it's a country name
+        if not any(c.isdigit() for c in line):
+            current_country = COUNTRY_FOLDER_MAP.get(line, line)
+            continue
+
+        if current_country is None:
+            continue
+
+        image_id = line.split()[0]
+        entries.append((image_id, current_country))
+
+    return entries
+
+
+def download_from_images_txt(
+    txt_path: Path,
+    output_dir: Path,
+    token: str,
+) -> None:
+    """
+    Download images listed in images.txt into country subfolders.
+
+    Args:
+        txt_path: Path to images.txt.
+        output_dir: Base directory for images (e.g. data/images/).
+        token: Mapillary API token.
+    """
+    entries = parse_images_txt(txt_path)
+    logger.info(f"Found {len(entries)} images in {txt_path.name}")
+
+    downloaded = 0
+    skipped = 0
+    for image_id, country in entries:
+        country_dir = output_dir / country
+        country_dir.mkdir(parents=True, exist_ok=True)
+        dest_path = country_dir / f"{image_id}.jpg"
+
+        if dest_path.exists():
+            skipped += 1
+            continue
+
+        try:
+            img_url = fetch_image_url(image_id, token, skip_pano=False)
+        except Exception as e:
+            logger.error(f"Failed to fetch URL for {image_id}: {e}")
+            continue
+
+        if not img_url:
+            logger.warning(f"No thumbnail URL for {image_id}.")
+            continue
+
+        success = download_image(img_url, dest_path)
+        if success:
+            downloaded += 1
+            logger.info(f"Saved: {country}/{image_id}.jpg ({downloaded} new)")
+
+    logger.info(f"Done. {downloaded} new, {skipped} already existed.")
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -477,6 +572,11 @@ def main() -> None:
         "--image-ids",
         type=Path,
         help="Text file with one Mapillary image ID per line.",
+    )
+    source_group.add_argument(
+        "--images-txt",
+        type=Path,
+        help="Structured images.txt file with countries and cue categories.",
     )
     parser.add_argument(
         "--output",
@@ -507,6 +607,12 @@ def main() -> None:
             output_dir=args.output,
             annotations_path=args.annotations,
             limit_per_coord=args.limit,
+            token=token,
+        )
+    elif args.images_txt:
+        download_from_images_txt(
+            txt_path=args.images_txt,
+            output_dir=args.output,
             token=token,
         )
     else:

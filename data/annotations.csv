@@ -1,49 +1,247 @@
 id,filepath,country,cue_type,multi_cue,cue_notes,region
-img_001,data/images/img_001.jpg,Japan,linguistic,False,"Kanji/hiragana on storefront signs and vending machines","East Asia"
-img_002,data/images/img_002.jpg,Brazil,environmental,False,"Dense tropical vegetation, red laterite soil visible on roadside","South America"
-img_003,data/images/img_003.jpg,United Kingdom,infrastructure,False,"Left-hand traffic, yellow road markings, distinct UK road sign style","Western Europe"
-img_004,data/images/img_004.jpg,France,linguistic,True,"French text on road signs; also Haussmann-style architecture","Western Europe"
-img_005,data/images/img_005.jpg,Australia,infrastructure,False,"Left-hand driving, Australian road signage style with green background","Oceania"
-img_006,data/images/img_006.jpg,Russia,linguistic,False,"Cyrillic script on shop signs and street names","Eastern Europe"
-img_007,data/images/img_007.jpg,Kenya,environmental,False,"Savanna grassland, acacia trees, dry red soil","Sub-Saharan Africa"
-img_008,data/images/img_008.jpg,United States,infrastructure,False,"Right-hand traffic, US-style green highway signs, fire hydrant visible","North America"
-img_009,data/images/img_009.jpg,Thailand,linguistic,True,"Thai script on signs; also tuk-tuks and Buddhist temple architecture","Southeast Asia"
-img_010,data/images/img_010.jpg,Norway,environmental,False,"Fjord landscape, conifer forests, Nordic wooden architecture","Northern Europe"
-957307771763353,data/images/957307771763353.jpg,Japan,,False,,East Asia
-582437666494123,data/images/582437666494123.jpg,Japan,,False,,East Asia
-302665491459568,data/images/302665491459568.jpg,Brazil,,False,,South America
-398315984838715,data/images/398315984838715.jpg,Brazil,,False,,South America
-219431059944333,data/images/219431059944333.jpg,United Kingdom,,False,,Western Europe
-332411378454508,data/images/332411378454508.jpg,United Kingdom,,False,,Western Europe
-172546408109043,data/images/172546408109043.jpg,France,,False,,Western Europe
-4291959827483412,data/images/4291959827483412.jpg,France,,False,,Western Europe
-3380812728688689,data/images/3380812728688689.jpg,Australia,,False,,Oceania
-501213617798619,data/images/501213617798619.jpg,Australia,,False,,Oceania
-462206611526817,data/images/462206611526817.jpg,Russia,,False,,Eastern Europe
-803369217227523,data/images/803369217227523.jpg,Russia,,False,,Eastern Europe
-508905396802422,data/images/508905396802422.jpg,Kenya,,False,,Sub-Saharan Africa
-250210923554035,data/images/250210923554035.jpg,Kenya,,False,,Sub-Saharan Africa
-948605179276538,data/images/948605179276538.jpg,United States,,False,,North America
-931743807579998,data/images/931743807579998.jpg,United States,,False,,North America
-741385973212790,data/images/741385973212790.jpg,Thailand,,False,,Southeast Asia
-457715058637396,data/images/457715058637396.jpg,Thailand,,False,,Southeast Asia
-1024659881273999,data/images/1024659881273999.jpg,Norway,,False,,Northern Europe
-919975862122617,data/images/919975862122617.jpg,Norway,,False,,Northern Europe
-476497430286660,data/images/476497430286660.jpg,South Korea,,False,,East Asia
-944976529608728,data/images/944976529608728.jpg,South Korea,,False,,East Asia
-500179054657801,data/images/500179054657801.jpg,Mexico,,False,,North America
-2885500368445645,data/images/2885500368445645.jpg,Mexico,,False,,North America
-297657825282979,data/images/297657825282979.jpg,India,,False,,South Asia
-296784165411294,data/images/296784165411294.jpg,India,,False,,South Asia
-1930167103789470,data/images/1930167103789470.jpg,Argentina,,False,,South America
-825456184765393,data/images/825456184765393.jpg,Argentina,,False,,South America
-1610653519139193,data/images/1610653519139193.jpg,Turkey,,False,,Middle East
-466972797740480,data/images/466972797740480.jpg,Turkey,,False,,Middle East
-2037771663027293,data/images/2037771663027293.jpg,Egypt,,False,,North Africa
-4173731225981863,data/images/4173731225981863.jpg,Egypt,,False,,North Africa
-145161880842200,data/images/145161880842200.jpg,Poland,,False,,Eastern Europe
-307604320946170,data/images/307604320946170.jpg,Poland,,False,,Eastern Europe
-162065705858712,data/images/162065705858712.jpg,South Africa,,False,,Sub-Saharan Africa
-499735191441485,data/images/499735191441485.jpg,South Africa,,False,,Sub-Saharan Africa
-3644198245690179,data/images/3644198245690179.jpg,Finland,,False,,Northern Europe
-1633599270162849,data/images/1633599270162849.jpg,Finland,,False,,Northern Europe
+457715058637396,data/images/Thailand/457715058637396.jpg,Thailand,linguistic,False,,Southeast Asia
+1226412864456843,data/images/Thailand/1226412864456843.jpg,Thailand,linguistic,False,,Southeast Asia
+575948974678423,data/images/Thailand/575948974678423.jpg,Thailand,linguistic,False,,Southeast Asia
+1907916583409218,data/images/Thailand/1907916583409218.jpg,Thailand,linguistic,False,,Southeast Asia
+1229019205948463,data/images/Thailand/1229019205948463.jpg,Thailand,linguistic,False,,Southeast Asia
+211837104080171,data/images/Thailand/211837104080171.jpg,Thailand,linguistic,False,,Southeast Asia
+1150885438667760,data/images/Thailand/1150885438667760.jpg,Thailand,environmental,False,,Southeast Asia
+3979168538829748,data/images/Thailand/3979168538829748.jpg,Thailand,environmental,False,,Southeast Asia
+808577723389713,data/images/Thailand/808577723389713.jpg,Thailand,environmental,False,,Southeast Asia
+2004161666603510,data/images/Thailand/2004161666603510.jpg,Thailand,environmental,False,,Southeast Asia
+1006946430268131,data/images/Thailand/1006946430268131.jpg,Thailand,environmental,False,,Southeast Asia
+178270827632064,data/images/Thailand/178270827632064.jpg,Thailand,infrastructure,False,,Southeast Asia
+271171101408434,data/images/Thailand/271171101408434.jpg,Thailand,infrastructure,False,,Southeast Asia
+810958548416936,data/images/Thailand/810958548416936.jpg,Thailand,infrastructure,False,,Southeast Asia
+1785132175427646,data/images/Thailand/1785132175427646.jpg,Thailand,infrastructure,False,,Southeast Asia
+299168191855349,data/images/Thailand/299168191855349.jpg,Thailand,infrastructure,False,,Southeast Asia
+2045127692630978,data/images/Thailand/2045127692630978.jpg,Thailand,linguistic,True,L/I,Southeast Asia
+2163680144113322,data/images/Thailand/2163680144113322.jpg,Thailand,linguistic,True,L/I,Southeast Asia
+319144149654169,data/images/Thailand/319144149654169.jpg,Thailand,infrastructure,True,I/E,Southeast Asia
+520916315769134,data/images/Thailand/520916315769134.jpg,Thailand,infrastructure,True,I/E,Southeast Asia
+152458183820778,data/images/Japan/152458183820778.jpg,Japan,linguistic,False,,East Asia
+440165814893145,data/images/Japan/440165814893145.jpg,Japan,linguistic,False,,East Asia
+767509549593622,data/images/Japan/767509549593622.jpg,Japan,linguistic,False,,East Asia
+2695833994102265,data/images/Japan/2695833994102265.jpg,Japan,linguistic,False,,East Asia
+142607858037493,data/images/Japan/142607858037493.jpg,Japan,linguistic,False,,East Asia
+1047314680817085,data/images/Japan/1047314680817085.jpg,Japan,environmental,False,,East Asia
+190942469412955,data/images/Japan/190942469412955.jpg,Japan,environmental,False,,East Asia
+894924341069728,data/images/Japan/894924341069728.jpg,Japan,environmental,False,,East Asia
+1081850585685916,data/images/Japan/1081850585685916.jpg,Japan,environmental,False,,East Asia
+260825139075014,data/images/Japan/260825139075014.jpg,Japan,environmental,False,,East Asia
+136425818514619,data/images/Japan/136425818514619.jpg,Japan,infrastructure,False,,East Asia
+156105246669177,data/images/Japan/156105246669177.jpg,Japan,infrastructure,False,,East Asia
+377598710213240,data/images/Japan/377598710213240.jpg,Japan,infrastructure,False,,East Asia
+437014989060601,data/images/Japan/437014989060601.jpg,Japan,infrastructure,False,,East Asia
+854709458936444,data/images/Japan/854709458936444.jpg,Japan,infrastructure,False,,East Asia
+938949896826793,data/images/Japan/938949896826793.jpg,Japan,infrastructure,False,,East Asia
+290812709592205,data/images/Japan/290812709592205.jpg,Japan,linguistic,True,L/I,East Asia
+289040792839183,data/images/Japan/289040792839183.jpg,Japan,linguistic,True,L/I,East Asia
+1047314680817085,data/images/Japan/1047314680817085.jpg,Japan,infrastructure,True,I/E,East Asia
+470586167552954,data/images/Japan/470586167552954.jpg,Japan,infrastructure,True,I/E,East Asia
+196051468872349,data/images/South Korea/196051468872349.jpg,South Korea,linguistic,False,,East Asia
+331949821822344,data/images/South Korea/331949821822344.jpg,South Korea,linguistic,False,,East Asia
+2741503659494347,data/images/South Korea/2741503659494347.jpg,South Korea,linguistic,False,,East Asia
+277246203862603,data/images/South Korea/277246203862603.jpg,South Korea,linguistic,False,,East Asia
+1565873594103905,data/images/South Korea/1565873594103905.jpg,South Korea,linguistic,False,,East Asia
+794106814860924,data/images/South Korea/794106814860924.jpg,South Korea,environmental,False,,East Asia
+492594748532110,data/images/South Korea/492594748532110.jpg,South Korea,environmental,False,,East Asia
+814406562818184,data/images/South Korea/814406562818184.jpg,South Korea,environmental,False,,East Asia
+161728509206348,data/images/South Korea/161728509206348.jpg,South Korea,environmental,False,,East Asia
+206343851042343,data/images/South Korea/206343851042343.jpg,South Korea,environmental,False,,East Asia
+758304861718074,data/images/South Korea/758304861718074.jpg,South Korea,infrastructure,False,,East Asia
+199034035238550,data/images/South Korea/199034035238550.jpg,South Korea,infrastructure,False,,East Asia
+1379510779348897,data/images/South Korea/1379510779348897.jpg,South Korea,infrastructure,False,,East Asia
+961888391525380,data/images/South Korea/961888391525380.jpg,South Korea,infrastructure,False,,East Asia
+206202834878088,data/images/South Korea/206202834878088.jpg,South Korea,infrastructure,False,,East Asia
+1517841032132727,data/images/South Korea/1517841032132727.jpg,South Korea,infrastructure,True,I/E,East Asia
+460388828376755,data/images/South Korea/460388828376755.jpg,South Korea,infrastructure,True,I/E,East Asia
+1754442094758486,data/images/South Korea/1754442094758486.jpg,South Korea,infrastructure,True,I/E,East Asia
+796048262044505,data/images/South Korea/796048262044505.jpg,South Korea,infrastructure,True,I/E,East Asia
+168098805244214,data/images/Canada/168098805244214.jpg,Canada,linguistic,False,,North America
+222325202658859,data/images/Canada/222325202658859.jpg,Canada,linguistic,False,,North America
+1218512493293656,data/images/Canada/1218512493293656.jpg,Canada,linguistic,False,,North America
+181001951369148,data/images/Canada/181001951369148.jpg,Canada,linguistic,False,,North America
+803310201247027,data/images/Canada/803310201247027.jpg,Canada,linguistic,False,,North America
+989525081452052,data/images/Canada/989525081452052.jpg,Canada,environmental,False,,North America
+4030081693716329,data/images/Canada/4030081693716329.jpg,Canada,environmental,False,,North America
+198953658537002,data/images/Canada/198953658537002.jpg,Canada,environmental,False,,North America
+969961501568803,data/images/Canada/969961501568803.jpg,Canada,environmental,False,,North America
+940050540077922,data/images/Canada/940050540077922.jpg,Canada,environmental,False,,North America
+926269851264618,data/images/Canada/926269851264618.jpg,Canada,environmental,False,,North America
+176630097655628,data/images/Canada/176630097655628.jpg,Canada,infrastructure,False,,North America
+195059399147230,data/images/Canada/195059399147230.jpg,Canada,infrastructure,False,,North America
+235938458327257,data/images/Canada/235938458327257.jpg,Canada,infrastructure,False,,North America
+274658587729126,data/images/Canada/274658587729126.jpg,Canada,infrastructure,False,,North America
+1163479260765146,data/images/Canada/1163479260765146.jpg,Canada,infrastructure,False,,North America
+378284530154965,data/images/Canada/378284530154965.jpg,Canada,infrastructure,True,I/E,North America
+950594109093164,data/images/Canada/950594109093164.jpg,Canada,infrastructure,True,I/E,North America
+138901978466526,data/images/Brazil/138901978466526.jpg,Brazil,linguistic,False,,South America
+398315984838715,data/images/Brazil/398315984838715.jpg,Brazil,linguistic,False,,South America
+459390835159119,data/images/Brazil/459390835159119.jpg,Brazil,linguistic,False,,South America
+482429913047515,data/images/Brazil/482429913047515.jpg,Brazil,linguistic,False,,South America
+518629336215262,data/images/Brazil/518629336215262.jpg,Brazil,linguistic,False,,South America
+756155818384887,data/images/Brazil/756155818384887.jpg,Brazil,linguistic,False,,South America
+514435633256170,data/images/Brazil/514435633256170.jpg,Brazil,environmental,False,,South America
+2053794441426344,data/images/Brazil/2053794441426344.jpg,Brazil,environmental,False,,South America
+1201832004800442,data/images/Brazil/1201832004800442.jpg,Brazil,environmental,False,,South America
+912754312633151,data/images/Brazil/912754312633151.jpg,Brazil,environmental,False,,South America
+349282100640470,data/images/Brazil/349282100640470.jpg,Brazil,environmental,False,,South America
+135287688640885,data/images/Brazil/135287688640885.jpg,Brazil,infrastructure,False,,South America
+219832166391162,data/images/Brazil/219832166391162.jpg,Brazil,infrastructure,False,,South America
+220793676128475,data/images/Brazil/220793676128475.jpg,Brazil,infrastructure,False,,South America
+325734548980659,data/images/Brazil/325734548980659.jpg,Brazil,infrastructure,False,,South America
+848475772411112,data/images/Brazil/848475772411112.jpg,Brazil,infrastructure,False,,South America
+214097986857394,data/images/Brazil/214097986857394.jpg,Brazil,environmental,True,E/I,South America
+602193974089454,data/images/Brazil/602193974089454.jpg,Brazil,infrastructure,True,I/E,South America
+246796917901999,data/images/Turkey/246796917901999.jpg,Turkey,linguistic,False,,Middle East
+482426352994635,data/images/Turkey/482426352994635.jpg,Turkey,linguistic,False,,Middle East
+531729644875629,data/images/Turkey/531729644875629.jpg,Turkey,linguistic,False,,Middle East
+6157072981017511,data/images/Turkey/6157072981017511.jpg,Turkey,linguistic,False,,Middle East
+935751752284148,data/images/Turkey/935751752284148.jpg,Turkey,linguistic,False,,Middle East
+325198605680784,data/images/Turkey/325198605680784.jpg,Turkey,environmental,False,,Middle East
+149952387145160,data/images/Turkey/149952387145160.jpg,Turkey,environmental,False,,Middle East
+682836391241190,data/images/Turkey/682836391241190.jpg,Turkey,environmental,False,,Middle East
+1669440350435638,data/images/Turkey/1669440350435638.jpg,Turkey,environmental,False,,Middle East
+573088391858726,data/images/Turkey/573088391858726.jpg,Turkey,environmental,False,,Middle East
+351899174059542,data/images/Turkey/351899174059542.jpg,Turkey,infrastructure,False,,Middle East
+987815121756187,data/images/Turkey/987815121756187.jpg,Turkey,infrastructure,False,,Middle East
+1693383554608117,data/images/Turkey/1693383554608117.jpg,Turkey,infrastructure,False,,Middle East
+1191007064661222,data/images/Turkey/1191007064661222.jpg,Turkey,infrastructure,False,,Middle East
+5818042231554215,data/images/Turkey/5818042231554215.jpg,Turkey,infrastructure,False,,Middle East
+1221010932680660,data/images/Turkey/1221010932680660.jpg,Turkey,linguistic,True,L/I,Middle East
+540545257321205,data/images/Turkey/540545257321205.jpg,Turkey,environmental,True,E/I,Middle East
+138089805020446,data/images/Russia/138089805020446.jpg,Russia,linguistic,False,,Eastern Europe
+210436527251266,data/images/Russia/210436527251266.jpg,Russia,linguistic,False,,Eastern Europe
+239869471230764,data/images/Russia/239869471230764.jpg,Russia,linguistic,False,,Eastern Europe
+304518974369542,data/images/Russia/304518974369542.jpg,Russia,linguistic,False,,Eastern Europe
+372789441176464,data/images/Russia/372789441176464.jpg,Russia,linguistic,False,,Eastern Europe
+319403972870474,data/images/Russia/319403972870474.jpg,Russia,environmental,False,,Eastern Europe
+152123926891819,data/images/Russia/152123926891819.jpg,Russia,environmental,False,,Eastern Europe
+841142621245583,data/images/Russia/841142621245583.jpg,Russia,environmental,False,,Eastern Europe
+513698122993439,data/images/Russia/513698122993439.jpg,Russia,environmental,False,,Eastern Europe
+1233124574388494,data/images/Russia/1233124574388494.jpg,Russia,environmental,False,,Eastern Europe
+153482973386154,data/images/Russia/153482973386154.jpg,Russia,infrastructure,False,,Eastern Europe
+178403647688386,data/images/Russia/178403647688386.jpg,Russia,infrastructure,False,,Eastern Europe
+199860531976865,data/images/Russia/199860531976865.jpg,Russia,infrastructure,False,,Eastern Europe
+302052808144632,data/images/Russia/302052808144632.jpg,Russia,infrastructure,False,,Eastern Europe
+464296254647917,data/images/Russia/464296254647917.jpg,Russia,infrastructure,False,,Eastern Europe
+528962348128260,data/images/Russia/528962348128260.jpg,Russia,infrastructure,False,,Eastern Europe
+2040514282758293,data/images/Russia/2040514282758293.jpg,Russia,infrastructure,True,I/E,Eastern Europe
+1198202800635495,data/images/Russia/1198202800635495.jpg,Russia,infrastructure,True,I/E,Eastern Europe
+521340188890395,data/images/Russia/521340188890395.jpg,Russia,infrastructure,True,I/E,Eastern Europe
+219266493341243,data/images/Germany/219266493341243.jpg,Germany,linguistic,False,,Western Europe
+373319998303302,data/images/Germany/373319998303302.jpg,Germany,linguistic,False,,Western Europe
+623194692235237,data/images/Germany/623194692235237.jpg,Germany,linguistic,False,,Western Europe
+809225919708286,data/images/Germany/809225919708286.jpg,Germany,linguistic,False,,Western Europe
+1146145335845311,data/images/Germany/1146145335845311.jpg,Germany,linguistic,False,,Western Europe
+915959609345026,data/images/Germany/915959609345026.jpg,Germany,environmental,False,,Western Europe
+483263036455045,data/images/Germany/483263036455045.jpg,Germany,environmental,False,,Western Europe
+309613200754939,data/images/Germany/309613200754939.jpg,Germany,environmental,False,,Western Europe
+273772257961237,data/images/Germany/273772257961237.jpg,Germany,environmental,False,,Western Europe
+507807932056201,data/images/Germany/507807932056201.jpg,Germany,environmental,False,,Western Europe
+135522545281664,data/images/Germany/135522545281664.jpg,Germany,infrastructure,False,,Western Europe
+168816815723846,data/images/Germany/168816815723846.jpg,Germany,infrastructure,False,,Western Europe
+259300162882957,data/images/Germany/259300162882957.jpg,Germany,infrastructure,False,,Western Europe
+481175526488584,data/images/Germany/481175526488584.jpg,Germany,infrastructure,False,,Western Europe
+641891463857650,data/images/Germany/641891463857650.jpg,Germany,infrastructure,False,,Western Europe
+2845642052323500,data/images/Germany/2845642052323500.jpg,Germany,infrastructure,False,,Western Europe
+117581480666207,data/images/Germany/117581480666207.jpg,Germany,environmental,True,E/I,Western Europe
+463449824945807,data/images/Germany/463449824945807.jpg,Germany,environmental,True,E/I,Western Europe
+511511906672359,data/images/Germany/511511906672359.jpg,Germany,environmental,True,E/I,Western Europe
+138004301639717,data/images/United Kingdom/138004301639717.jpg,United Kingdom,linguistic,False,,Western Europe
+147595114694407,data/images/United Kingdom/147595114694407.jpg,United Kingdom,linguistic,False,,Western Europe
+187363636541147,data/images/United Kingdom/187363636541147.jpg,United Kingdom,linguistic,False,,Western Europe
+305795487726908,data/images/United Kingdom/305795487726908.jpg,United Kingdom,linguistic,False,,Western Europe
+347286850577628,data/images/United Kingdom/347286850577628.jpg,United Kingdom,linguistic,False,,Western Europe
+521054028905778,data/images/United Kingdom/521054028905778.jpg,United Kingdom,linguistic,False,,Western Europe
+581489323242060,data/images/United Kingdom/581489323242060.jpg,United Kingdom,environmental,False,,Western Europe
+481412683186753,data/images/United Kingdom/481412683186753.jpg,United Kingdom,environmental,False,,Western Europe
+810598489833403,data/images/United Kingdom/810598489833403.jpg,United Kingdom,environmental,False,,Western Europe
+112090524256237,data/images/United Kingdom/112090524256237.jpg,United Kingdom,environmental,False,,Western Europe
+1129892851767203,data/images/United Kingdom/1129892851767203.jpg,United Kingdom,environmental,False,,Western Europe
+115775450978014,data/images/United Kingdom/115775450978014.jpg,United Kingdom,infrastructure,False,,Western Europe
+167655385363070,data/images/United Kingdom/167655385363070.jpg,United Kingdom,infrastructure,False,,Western Europe
+175992341075287,data/images/United Kingdom/175992341075287.jpg,United Kingdom,infrastructure,False,,Western Europe
+209769830975948,data/images/United Kingdom/209769830975948.jpg,United Kingdom,infrastructure,False,,Western Europe
+308641840934522,data/images/United Kingdom/308641840934522.jpg,United Kingdom,infrastructure,False,,Western Europe
+321748849379117,data/images/United Kingdom/321748849379117.jpg,United Kingdom,infrastructure,False,,Western Europe
+439904683994248,data/images/United Kingdom/439904683994248.jpg,United Kingdom,environmental,True,E/I,Western Europe
+480269678409444,data/images/United Kingdom/480269678409444.jpg,United Kingdom,environmental,True,E/I,Western Europe
+217513039907467,data/images/India/217513039907467.jpg,India,linguistic,False,,South Asia
+234636925123424,data/images/India/234636925123424.jpg,India,linguistic,False,,South Asia
+297657825282979,data/images/India/297657825282979.jpg,India,linguistic,False,,South Asia
+356004399701531,data/images/India/356004399701531.jpg,India,linguistic,False,,South Asia
+500664757735635,data/images/India/500664757735635.jpg,India,linguistic,False,,South Asia
+1116835855388536,data/images/India/1116835855388536.jpg,India,linguistic,False,,South Asia
+778530789820223,data/images/India/778530789820223.jpg,India,environmental,False,,South Asia
+819876982289523,data/images/India/819876982289523.jpg,India,environmental,False,,South Asia
+677550486338569,data/images/India/677550486338569.jpg,India,environmental,False,,South Asia
+763863670964310,data/images/India/763863670964310.jpg,India,environmental,False,,South Asia
+296535572111865,data/images/India/296535572111865.jpg,India,environmental,False,,South Asia
+153702933280788,data/images/India/153702933280788.jpg,India,infrastructure,False,,South Asia
+179711293910027,data/images/India/179711293910027.jpg,India,infrastructure,False,,South Asia
+279810440516321,data/images/India/279810440516321.jpg,India,infrastructure,False,,South Asia
+470522267483964,data/images/India/470522267483964.jpg,India,infrastructure,False,,South Asia
+2028514487607362,data/images/India/2028514487607362.jpg,India,infrastructure,False,,South Asia
+176370321047620,data/images/India/176370321047620.jpg,India,linguistic,True,L/I,South Asia
+622052205419164,data/images/India/622052205419164.jpg,India,infrastructure,True,I/E,South Asia
+806325608004935,data/images/India/806325608004935.jpg,India,linguistic,True,L/I,South Asia
+738555045496397,data/images/India/738555045496397.jpg,India,infrastructure,True,I/E,South Asia
+490831222553389,data/images/Indonesia/490831222553389.jpg,Indonesia,linguistic,False,,Southeast Asia
+725709031823640,data/images/Indonesia/725709031823640.jpg,Indonesia,linguistic,False,,Southeast Asia
+1112986309345693,data/images/Indonesia/1112986309345693.jpg,Indonesia,linguistic,False,,Southeast Asia
+1392611162266480,data/images/Indonesia/1392611162266480.jpg,Indonesia,linguistic,False,,Southeast Asia
+1616783755750407,data/images/Indonesia/1616783755750407.jpg,Indonesia,linguistic,False,,Southeast Asia
+293807015631064,data/images/Indonesia/293807015631064.jpg,Indonesia,environmental,False,,Southeast Asia
+1226250909439874,data/images/Indonesia/1226250909439874.jpg,Indonesia,environmental,False,,Southeast Asia
+807684670154653,data/images/Indonesia/807684670154653.jpg,Indonesia,environmental,False,,Southeast Asia
+484850762932091,data/images/Indonesia/484850762932091.jpg,Indonesia,environmental,False,,Southeast Asia
+232933051941188,data/images/Indonesia/232933051941188.jpg,Indonesia,environmental,False,,Southeast Asia
+582620906652367,data/images/Indonesia/582620906652367.jpg,Indonesia,infrastructure,False,,Southeast Asia
+607629481050805,data/images/Indonesia/607629481050805.jpg,Indonesia,infrastructure,False,,Southeast Asia
+1194955122731854,data/images/Indonesia/1194955122731854.jpg,Indonesia,infrastructure,False,,Southeast Asia
+1393844075594657,data/images/Indonesia/1393844075594657.jpg,Indonesia,infrastructure,False,,Southeast Asia
+2228059611052984,data/images/Indonesia/2228059611052984.jpg,Indonesia,infrastructure,False,,Southeast Asia
+916470115981912,data/images/Indonesia/916470115981912.jpg,Indonesia,linguistic,True,L/I,Southeast Asia
+1219631292847062,data/images/Indonesia/1219631292847062.jpg,Indonesia,linguistic,True,L/I/E,Southeast Asia
+3224561361204532,data/images/Indonesia/3224561361204532.jpg,Indonesia,linguistic,True,L/I,Southeast Asia
+489164192207582,data/images/Indonesia/489164192207582.jpg,Indonesia,linguistic,True,L/I,Southeast Asia
+264300815377549,data/images/Mexico/264300815377549.jpg,Mexico,linguistic,False,,North America
+478191450171845,data/images/Mexico/478191450171845.jpg,Mexico,linguistic,False,,North America
+748253825864272,data/images/Mexico/748253825864272.jpg,Mexico,linguistic,False,,North America
+786663472243353,data/images/Mexico/786663472243353.jpg,Mexico,linguistic,False,,North America
+849219055942404,data/images/Mexico/849219055942404.jpg,Mexico,linguistic,False,,North America
+380340886560954,data/images/Mexico/380340886560954.jpg,Mexico,environmental,False,,North America
+1361465200894835,data/images/Mexico/1361465200894835.jpg,Mexico,environmental,False,,North America
+505932387214095,data/images/Mexico/505932387214095.jpg,Mexico,environmental,False,,North America
+469478157662228,data/images/Mexico/469478157662228.jpg,Mexico,environmental,False,,North America
+1678097512892977,data/images/Mexico/1678097512892977.jpg,Mexico,environmental,False,,North America
+170572548352027,data/images/Mexico/170572548352027.jpg,Mexico,infrastructure,False,,North America
+266276049010371,data/images/Mexico/266276049010371.jpg,Mexico,infrastructure,False,,North America
+313530870266732,data/images/Mexico/313530870266732.jpg,Mexico,infrastructure,False,,North America
+916433169201245,data/images/Mexico/916433169201245.jpg,Mexico,infrastructure,False,,North America
+994459462470339,data/images/Mexico/994459462470339.jpg,Mexico,infrastructure,False,,North America
+140888367968066,data/images/Mexico/140888367968066.jpg,Mexico,infrastructure,True,I/E,North America
+316475609935149,data/images/Mexico/316475609935149.jpg,Mexico,infrastructure,True,I/E,North America
+596834903306510,data/images/Mexico/596834903306510.jpg,Mexico,infrastructure,True,I/E/L,North America
+1079696519219903,data/images/Mexico/1079696519219903.jpg,Mexico,infrastructure,True,I/E,North America
+169931138355207,data/images/Finland/169931138355207.jpg,Finland,linguistic,False,,Northern Europe
+475031450429559,data/images/Finland/475031450429559.jpg,Finland,linguistic,False,,Northern Europe
+574992280746010,data/images/Finland/574992280746010.jpg,Finland,linguistic,False,,Northern Europe
+805520074141147,data/images/Finland/805520074141147.jpg,Finland,linguistic,False,,Northern Europe
+134900946307743,data/images/Finland/134900946307743.jpg,Finland,linguistic,False,,Northern Europe
+242952400915587,data/images/Finland/242952400915587.jpg,Finland,environmental,False,,Northern Europe
+1626631335412978,data/images/Finland/1626631335412978.jpg,Finland,environmental,False,,Northern Europe
+610557738192143,data/images/Finland/610557738192143.jpg,Finland,environmental,False,,Northern Europe
+2924901524450880,data/images/Finland/2924901524450880.jpg,Finland,environmental,False,,Northern Europe
+481469409758536,data/images/Finland/481469409758536.jpg,Finland,environmental,False,,Northern Europe
+134987751957421,data/images/Finland/134987751957421.jpg,Finland,infrastructure,False,,Northern Europe
+324444515713750,data/images/Finland/324444515713750.jpg,Finland,infrastructure,False,,Northern Europe
+935176943691725,data/images/Finland/935176943691725.jpg,Finland,infrastructure,False,,Northern Europe
+538926447293032,data/images/Finland/538926447293032.jpg,Finland,infrastructure,False,,Northern Europe
+395731848154768,data/images/Finland/395731848154768.jpg,Finland,infrastructure,False,,Northern Europe
+146587644636076,data/images/Finland/146587644636076.jpg,Finland,infrastructure,True,I/L,Northern Europe
+284926516576964,data/images/Finland/284926516576964.jpg,Finland,infrastructure,True,I/E,Northern Europe
+303649478859568,data/images/Finland/303649478859568.jpg,Finland,infrastructure,True,I/E,Northern Europe
+556194602034542,data/images/Finland/556194602034542.jpg,Finland,infrastructure,True,I/E,Northern Europe
