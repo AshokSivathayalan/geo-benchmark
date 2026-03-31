@@ -16,6 +16,22 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 # Normalization map for common country name variants
+COUNTRY_TO_REGION: dict[str, str] = {
+    "Japan": "East Asia",
+    "South Korea": "East Asia",
+    "Canada": "North America",
+    "Brazil": "South America",
+    "Turkey": "Middle East",
+    "Russia": "Eastern Europe",
+    "Germany": "Western Europe",
+    "United Kingdom": "Western Europe",
+    "India": "South Asia",
+    "Indonesia": "Southeast Asia",
+    "Mexico": "North America",
+    "Finland": "Northern Europe",
+    "Thailand": "Southeast Asia",
+}
+
 COUNTRY_ALIASES: dict[str, str] = {
     "uk": "United Kingdom",
     "u.k.": "United Kingdom",
@@ -128,6 +144,37 @@ def _normalize_country(raw: str) -> str:
     return cleaned.title()
 
 
+def get_region(country: str) -> str:
+    """
+    Look up the geographic region for a country name.
+
+    Args:
+        country: Normalized country name.
+
+    Returns:
+        Region string, or empty string if unknown.
+    """
+    if not country or country == "PARSE_ERROR":
+        return ""
+    return COUNTRY_TO_REGION.get(country, "")
+
+
+def is_region_correct(predicted: str, true_region: str) -> bool:
+    """
+    Check whether the predicted country falls in the same region as the true country.
+
+    Args:
+        predicted: Normalized predicted country name.
+        true_region: Ground truth region.
+
+    Returns:
+        True if the predicted country's region matches, False otherwise.
+    """
+    if predicted == "PARSE_ERROR" or not true_region:
+        return False
+    return get_region(predicted).lower() == true_region.strip().lower()
+
+
 def is_correct(predicted: str, true_country: str) -> bool:
     """
     Compare predicted and true country names case-insensitively.
@@ -144,15 +191,17 @@ def is_correct(predicted: str, true_country: str) -> bool:
     return predicted.strip().lower() == true_country.strip().lower()
 
 
-def parse_results_file(input_path: Path, output_path: Path) -> None:
+def parse_results_file(input_path: Path, output_path: Path, annotations_path: Path | None = None) -> None:
     """
     Re-parse the raw_response column of a results CSV and recompute predicted_country and correct.
 
     Useful for re-running parsing logic without re-querying the API.
+    If annotations_path is provided, joins true_region and computes region_correct.
 
     Args:
         input_path: Path to results CSV with a raw_response column.
         output_path: Path to write the updated results CSV.
+        annotations_path: Optional path to annotations CSV for region data.
     """
     df = pd.read_csv(input_path)
 
@@ -162,6 +211,18 @@ def parse_results_file(input_path: Path, output_path: Path) -> None:
     df["predicted_country"] = df["raw_response"].apply(parse_country)
     df["correct"] = df.apply(
         lambda row: is_correct(row["predicted_country"], row["true_country"]), axis=1
+    )
+
+    # Add region correctness
+    if annotations_path is not None:
+        annotations = pd.read_csv(annotations_path)
+        region_map = annotations.set_index("id")["region"].to_dict()
+        df["true_region"] = df["id"].map(region_map).fillna("")
+    elif "true_region" not in df.columns:
+        df["true_region"] = df["true_country"].apply(lambda c: COUNTRY_TO_REGION.get(c, ""))
+
+    df["region_correct"] = df.apply(
+        lambda row: is_region_correct(row["predicted_country"], row["true_region"]), axis=1
     )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -177,9 +238,10 @@ def main() -> None:
     )
     parser.add_argument("--input", required=True, type=Path, help="Input results CSV path.")
     parser.add_argument("--output", required=True, type=Path, help="Output parsed CSV path.")
+    parser.add_argument("--annotations", type=Path, default=None, help="Annotations CSV for region data.")
     args = parser.parse_args()
 
-    parse_results_file(args.input, args.output)
+    parse_results_file(args.input, args.output, annotations_path=args.annotations)
 
 
 if __name__ == "__main__":

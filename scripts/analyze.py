@@ -56,6 +56,8 @@ def load_all_results(results_dir: Path) -> pd.DataFrame:
 
     combined = pd.concat(dfs, ignore_index=True)
     combined["correct"] = combined["correct"].astype(bool)
+    if "region_correct" in combined.columns:
+        combined["region_correct"] = combined["region_correct"].astype(bool)
     logger.info(f"Total rows loaded: {len(combined)}")
     return combined
 
@@ -84,9 +86,17 @@ def accuracy_by_model(df: pd.DataFrame) -> pd.DataFrame:
     return grouped.sort_values("accuracy", ascending=False)
 
 
+def _exclude_multicue(df: pd.DataFrame) -> pd.DataFrame:
+    """Return a copy of df with multi-cue rows removed, if the column exists."""
+    if "multi_cue" in df.columns:
+        return df[~df["multi_cue"]].copy()
+    return df
+
+
 def accuracy_by_cue(df: pd.DataFrame) -> pd.DataFrame:
     """
     Compute per-cue-type accuracy (aggregated across all models).
+    Excludes multi-cue images to avoid arbitrary cue assignments.
 
     Args:
         df: Combined results DataFrame.
@@ -94,7 +104,8 @@ def accuracy_by_cue(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with columns [cue_type, accuracy, n_images].
     """
-    grouped = df.groupby("cue_type")["correct"].agg(["mean", "count"]).reset_index()
+    single = _exclude_multicue(df)
+    grouped = single.groupby("cue_type")["correct"].agg(["mean", "count"]).reset_index()
     grouped.columns = ["cue_type", "accuracy", "n_images"]
     return grouped
 
@@ -102,6 +113,7 @@ def accuracy_by_cue(df: pd.DataFrame) -> pd.DataFrame:
 def accuracy_by_model_and_cue(df: pd.DataFrame) -> pd.DataFrame:
     """
     Compute accuracy broken down by model × cue_type (the main result table).
+    Excludes multi-cue images to avoid arbitrary cue assignments.
 
     Args:
         df: Combined results DataFrame.
@@ -109,7 +121,8 @@ def accuracy_by_model_and_cue(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         Pivot table with models as rows and cue types as columns.
     """
-    grouped = df.groupby(["model", "cue_type"])["correct"].mean().reset_index()
+    single = _exclude_multicue(df)
+    grouped = single.groupby(["model", "cue_type"])["correct"].mean().reset_index()
     grouped.columns = ["model", "cue_type", "accuracy"]
     pivot = grouped.pivot(index="model", columns="cue_type", values="accuracy")
 
@@ -118,8 +131,52 @@ def accuracy_by_model_and_cue(df: pd.DataFrame) -> pd.DataFrame:
         if cue not in pivot.columns:
             pivot[cue] = float("nan")
 
-    # Add overall column
-    pivot["overall"] = df.groupby("model")["correct"].mean()
+    # Add overall column (still on single-cue only for consistency)
+    pivot["overall"] = single.groupby("model")["correct"].mean()
+    return pivot[CUE_TYPES + ["overall"]].sort_values("overall", ascending=False)
+
+
+def region_accuracy_by_model(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute per-model region-level accuracy (predicted country in correct region).
+
+    Requires a 'region_correct' column. If absent, returns an empty DataFrame.
+
+    Args:
+        df: Combined results DataFrame.
+
+    Returns:
+        DataFrame with columns [model, region_accuracy, n_images].
+    """
+    if "region_correct" not in df.columns:
+        logger.warning("'region_correct' column not found — skipping region accuracy.")
+        return pd.DataFrame()
+    grouped = df.groupby("model")["region_correct"].agg(["mean", "count"]).reset_index()
+    grouped.columns = ["model", "region_accuracy", "n_images"]
+    return grouped.sort_values("region_accuracy", ascending=False)
+
+
+def region_accuracy_by_model_and_cue(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute region-level accuracy broken down by model × cue_type.
+    Excludes multi-cue images.
+
+    Args:
+        df: Combined results DataFrame.
+
+    Returns:
+        Pivot table with models as rows and cue types as columns.
+    """
+    if "region_correct" not in df.columns:
+        return pd.DataFrame()
+    single = _exclude_multicue(df)
+    grouped = single.groupby(["model", "cue_type"])["region_correct"].mean().reset_index()
+    grouped.columns = ["model", "cue_type", "region_accuracy"]
+    pivot = grouped.pivot(index="model", columns="cue_type", values="region_accuracy")
+    for cue in CUE_TYPES:
+        if cue not in pivot.columns:
+            pivot[cue] = float("nan")
+    pivot["overall"] = single.groupby("model")["region_correct"].mean()
     return pivot[CUE_TYPES + ["overall"]].sort_values("overall", ascending=False)
 
 
@@ -167,6 +224,16 @@ def print_accuracy_tables(df: pd.DataFrame) -> None:
     pivot = accuracy_by_model_and_cue(df)
     print(pivot.applymap(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A").to_string())
 
+    region_by_model = region_accuracy_by_model(df)
+    if not region_by_model.empty:
+        print("\n--- Region-Level Accuracy by Model ---")
+        print(region_by_model.to_string(index=False, float_format="{:.1%}".format))
+
+    region_pivot = region_accuracy_by_model_and_cue(df)
+    if not region_pivot.empty:
+        print("\n--- Region-Level Accuracy: Model × Cue Type ---")
+        print(region_pivot.applymap(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A").to_string())
+
     multicue = accuracy_multicue(df)
     if not multicue.empty:
         print("\n--- Multi-Cue vs Single-Cue Accuracy ---")
@@ -207,12 +274,13 @@ def plot_accuracy_by_model(df: pd.DataFrame, output_dir: Path) -> None:
 def plot_accuracy_by_cue(df: pd.DataFrame, output_dir: Path) -> None:
     """
     Bar chart of accuracy per cue type, aggregated across models.
+    Excludes multi-cue images.
 
     Args:
         df: Combined results DataFrame.
         output_dir: Directory to save the PNG figure.
     """
-    data = accuracy_by_cue(df)
+    data = accuracy_by_cue(df)  # already excludes multi-cue
     colors = [CUE_PALETTE.get(c, "#888888") for c in data["cue_type"]]
 
     fig, ax = plt.subplots(figsize=(6, 4))
@@ -270,12 +338,14 @@ def plot_model_by_cue_heatmap(df: pd.DataFrame, output_dir: Path) -> None:
 def plot_grouped_by_model_and_cue(df: pd.DataFrame, output_dir: Path) -> None:
     """
     Grouped bar chart: one group per model, bars per cue type.
+    Excludes multi-cue images.
 
     Args:
         df: Combined results DataFrame.
         output_dir: Directory to save the PNG figure.
     """
-    grouped = df.groupby(["model", "cue_type"])["correct"].mean().reset_index()
+    single = _exclude_multicue(df)
+    grouped = single.groupby(["model", "cue_type"])["correct"].mean().reset_index()
     grouped.columns = ["model", "cue_type", "accuracy"]
 
     fig, ax = plt.subplots(figsize=(9, 5))
@@ -377,6 +447,12 @@ def main() -> None:
         help="Directory to save generated plots (default: figures/).",
     )
     parser.add_argument(
+        "--annotations",
+        type=Path,
+        default=None,
+        help="Path to annotations CSV (used to identify multi-cue images).",
+    )
+    parser.add_argument(
         "--no-plots",
         action="store_true",
         help="Skip plot generation; print tables only.",
@@ -384,6 +460,14 @@ def main() -> None:
     args = parser.parse_args()
 
     df = load_all_results(args.results)
+
+    # Tag multi-cue images from annotations so per-cue analyses can exclude them
+    if args.annotations is not None:
+        annotations = pd.read_csv(args.annotations)
+        multi_cue_ids = set(annotations.loc[annotations["multi_cue"].astype(str).str.lower().isin(["true", "1", "yes"]), "id"].astype(str))
+        df["multi_cue"] = df["id"].astype(str).isin(multi_cue_ids)
+        logger.info(f"Tagged {df['multi_cue'].sum()} result rows as multi-cue.")
+
     print_accuracy_tables(df)
 
     if not args.no_plots:

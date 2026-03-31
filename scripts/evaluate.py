@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-from parse_results import parse_country, is_correct
+from parse_results import parse_country, is_correct, is_region_correct
 
 logger = logging.getLogger(__name__)
 
@@ -43,18 +43,20 @@ REASONING: <your step-by-step analysis>
 COUNTRY: <single country name only>"""
 
 SUPPORTED_MODELS = {
-    "claude": "claude-sonnet-4-20250514",
-    "gpt4o": "gpt-4o",
+    "claude": "claude-haiku-4.5",
+    "gpt4o": "gpt-4o-mini",
     "gemini": "gemini-2.5-flash",
 }
 
 # Minimum seconds between requests per model (to respect rate limits)
 RATE_LIMITS = {
     "gemini": 12.0,  # 5 RPM = 12s between requests
+    "gpt4o": 5.0,    # avoid exceeding TPM limit
 }
 
 RESULTS_FIELDNAMES = [
-    "id", "cue_type", "true_country", "predicted_country", "correct", "model", "raw_response"
+    "id", "cue_type", "true_country", "predicted_country", "correct",
+    "true_region", "region_correct", "model", "raw_response",
 ]
 
 
@@ -357,12 +359,17 @@ def run_evaluation(
                     predicted_country = "PARSE_ERROR"
                     correct = False
 
+            true_region = row.get("region", "")
+            region_correct = is_region_correct(predicted_country, true_region)
+
             result_row = {
                 "id": image_id,
                 "cue_type": row["cue_type"],
                 "true_country": row["country"],
                 "predicted_country": predicted_country,
                 "correct": correct,
+                "true_region": true_region,
+                "region_correct": region_correct,
                 "model": SUPPORTED_MODELS[model_key],
                 "raw_response": raw_response,
             }
