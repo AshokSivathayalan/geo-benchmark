@@ -43,9 +43,10 @@ REASONING: <your step-by-step analysis>
 COUNTRY: <single country name only>"""
 
 SUPPORTED_MODELS = {
-    "claude": "claude-haiku-4.5",
+    "claude": "claude-haiku-4-5",
     "gpt4o": "gpt-4o-mini",
     "gemini": "gemini-2.5-flash",
+    "opus": "claude-opus-4-6"
 }
 
 # Minimum seconds between requests per model (to respect rate limits)
@@ -108,7 +109,7 @@ def call_claude(image_b64: str, model_id: str, max_retries: int = 3) -> str:
     if not api_key:
         raise EnvironmentError("ANTHROPIC_API_KEY environment variable not set.")
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = anthropic.Anthropic(api_key=api_key, timeout=120.0)
 
     for attempt in range(1, max_retries + 1):
         try:
@@ -259,7 +260,7 @@ def query_model(model_key: str, image_b64: str) -> str:
         Raw text response from the model.
     """
     model_id = SUPPORTED_MODELS[model_key]
-    if model_key == "claude":
+    if model_key in ("claude", "opus"):
         return call_claude(image_b64, model_id)
     elif model_key == "gpt4o":
         return call_gpt4o(image_b64, model_id)
@@ -355,9 +356,7 @@ def run_evaluation(
                             time.sleep(wait_time)
                 except Exception as e:
                     logger.error(f"[{image_id}] Model query failed: {e}")
-                    raw_response = f"API_ERROR: {e}"
-                    predicted_country = "PARSE_ERROR"
-                    correct = False
+                    continue
 
             true_region = row.get("region", "")
             region_correct = is_region_correct(predicted_country, true_region)

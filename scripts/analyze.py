@@ -222,7 +222,7 @@ def print_accuracy_tables(df: pd.DataFrame) -> None:
 
     print("\n--- Main Result Table: Model × Cue Type ---")
     pivot = accuracy_by_model_and_cue(df)
-    print(pivot.applymap(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A").to_string())
+    print(pivot.map(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A").to_string())
 
     region_by_model = region_accuracy_by_model(df)
     if not region_by_model.empty:
@@ -232,7 +232,7 @@ def print_accuracy_tables(df: pd.DataFrame) -> None:
     region_pivot = region_accuracy_by_model_and_cue(df)
     if not region_pivot.empty:
         print("\n--- Region-Level Accuracy: Model × Cue Type ---")
-        print(region_pivot.applymap(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A").to_string())
+        print(region_pivot.map(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A").to_string())
 
     multicue = accuracy_multicue(df)
     if not multicue.empty:
@@ -410,6 +410,61 @@ def plot_multicue(df: pd.DataFrame, output_dir: Path) -> None:
     logger.info(f"Saved: {out}")
 
 
+def plot_region_accuracy_by_model(df: pd.DataFrame, output_dir: Path) -> None:
+    """Bar chart of region-level accuracy per model."""
+    data = region_accuracy_by_model(df)
+    if data.empty:
+        return
+
+    fig, ax = plt.subplots(figsize=(7, 4))
+    bars = ax.bar(data["model"], data["region_accuracy"], color="#55A868", edgecolor="white")
+    ax.bar_label(bars, fmt="{:.1%}", padding=3, fontsize=9)
+    ax.set_xlabel("Model")
+    ax.set_ylabel("Region Accuracy")
+    ax.set_title("Region-Level Accuracy by Model")
+    ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=1))
+    ax.set_ylim(0, min(1.0, data["region_accuracy"].max() + 0.15))
+    ax.tick_params(axis="x", rotation=15)
+    plt.tight_layout()
+
+    out = output_dir / "region_accuracy_by_model.png"
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    logger.info(f"Saved: {out}")
+
+
+def plot_region_model_by_cue_heatmap(df: pd.DataFrame, output_dir: Path) -> None:
+    """Heatmap of region-level accuracy for each model x cue type combination."""
+    pivot = region_accuracy_by_model_and_cue(df)
+    if pivot.empty:
+        return
+    pivot_display = pivot[CUE_TYPES]
+
+    fig, ax = plt.subplots(figsize=(7, max(3, len(pivot) * 0.8 + 1.5)))
+    sns.heatmap(
+        pivot_display,
+        annot=True,
+        fmt=".1%",
+        cmap="YlGn",
+        vmin=0,
+        vmax=1,
+        linewidths=0.5,
+        ax=ax,
+        cbar_kws={"format": mticker.PercentFormatter(xmax=1)},
+    )
+    ax.set_title("Region-Level Accuracy Heatmap: Model × Cue Type")
+    ax.set_xlabel("Cue Type")
+    ax.set_ylabel("Model")
+    ax.tick_params(axis="x", rotation=0)
+    ax.tick_params(axis="y", rotation=0)
+    plt.tight_layout()
+
+    out = output_dir / "heatmap_region_model_by_cue.png"
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    logger.info(f"Saved: {out}")
+
+
 def generate_all_plots(df: pd.DataFrame, output_dir: Path) -> None:
     """
     Generate all analysis plots and save to output_dir.
@@ -424,6 +479,8 @@ def generate_all_plots(df: pd.DataFrame, output_dir: Path) -> None:
     plot_model_by_cue_heatmap(df, output_dir)
     plot_grouped_by_model_and_cue(df, output_dir)
     plot_multicue(df, output_dir)
+    plot_region_accuracy_by_model(df, output_dir)
+    plot_region_model_by_cue_heatmap(df, output_dir)
 
 
 # ---------------------------------------------------------------------------
