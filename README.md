@@ -1,4 +1,4 @@
-# GeoVLM-Bench
+# GeoClue
 
 A benchmark for evaluating geographic visual reasoning in vision-language models (VLMs), structured around cue type annotations (linguistic, environmental, infrastructure).
 
@@ -61,7 +61,7 @@ Pass `--annotations` to exclude multi-cue images from per-cue breakdowns (recomm
 ## Project Structure
 
 ```
-geovlm-bench/
+geoclue/
 ├── data/
 │   ├── images/            ← street-level images (JPEG), organized by country
 │   └── annotations.csv    ← ground truth labels and cue categories

@@ -1,5 +1,5 @@
 """
-evaluate.py — Core evaluation pipeline for GeoVLM-Bench.
+evaluate.py — Core evaluation pipeline for GeoClue.
 
 Sends street-level images to a VLM and records country predictions.
 
@@ -423,7 +423,7 @@ def main() -> None:
         datefmt="%H:%M:%S",
     )
 
-    parser = argparse.ArgumentParser(description="GeoVLM-Bench evaluation pipeline.")
+    parser = argparse.ArgumentParser(description="GeoClue evaluation pipeline.")
     parser.add_argument(
         "--model",
         required=True,

@@ -1,5 +1,5 @@
 """
-analyze.py — Compute accuracy tables and generate plots for GeoVLM-Bench results.
+analyze.py — Compute accuracy tables and generate plots for GeoClue results.
 
 Usage:
     python scripts/analyze.py --results results/ --output figures/
@@ -529,7 +529,7 @@ def generate_all_plots(df: pd.DataFrame, output_dir: Path) -> None:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-    parser = argparse.ArgumentParser(description="GeoVLM-Bench analysis: accuracy tables and plots.")
+    parser = argparse.ArgumentParser(description="GeoClue analysis: accuracy tables and plots.")
     parser.add_argument(
         "--results",
         type=Path,
