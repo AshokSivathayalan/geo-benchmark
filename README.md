@@ -30,15 +30,15 @@ python scripts/download_images.py --image-ids my_ids.txt --output data/images/
 ### 2. Run evaluation (pilot first!)
 ```bash
 # Always pilot first to estimate cost
-python scripts/evaluate.py --model gemini --input data/annotations.csv --output results/results_gemini.csv --pilot 10
+python scripts/evaluate.py --model gemini-2.5flash --input data/annotations.csv --output results/results_gemini-2.5flash.csv --pilot 10
 
-# Full run (will prompt for confirmation)
-python scripts/evaluate.py --model gemini --input data/annotations.csv --output results/results_gemini.csv
-python scripts/evaluate.py --model claude --input data/annotations.csv --output results/results_claude.csv
-python scripts/evaluate.py --model gpt4o  --input data/annotations.csv --output results/results_gpt4o.csv
+# Full run
+python scripts/evaluate.py --model gemini-2.5flash --input data/annotations.csv --output results/results_gemini-2.5flash.csv
+python scripts/evaluate.py --model claude-haiku --input data/annotations.csv --output results/results_claude-haiku.csv
+python scripts/evaluate.py --model gpt-4omini --input data/annotations.csv --output results/results_gpt-4omini.csv
 ```
 
-Supported models: `gemini` (Gemini 2.5 Flash), `claude` (Claude Haiku 4.5), `gpt4o` (GPT-4o-mini).
+Supported models: `claude-haiku` (Claude Haiku 4.5), `claude-sonnet` (Claude Sonnet 4.6), `gpt-4omini` (GPT-4o-mini), `gpt-5.4mini` (GPT-5.4-mini), `gemini-2.5flash` (Gemini 2.5 Flash), `gemini-3flash` (Gemini 3 Flash).
 
 Runs are resumable — if interrupted, re-running the same command skips already-completed images.
 
@@ -46,7 +46,7 @@ Runs are resumable — if interrupted, re-running the same command skips already
 
 Re-extract country predictions from saved raw responses without re-querying APIs:
 ```bash
-python scripts/parse_results.py --input results/results_gemini.csv --output results/results_gemini.csv --annotations data/annotations.csv
+python scripts/parse_results.py --input results/results_gemini-2.5flash.csv --output results/results_gemini-2.5flash.csv --annotations data/annotations.csv
 ```
 
 The `--annotations` flag adds region correctness data to the results.
