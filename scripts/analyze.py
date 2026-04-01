@@ -180,6 +180,38 @@ def region_accuracy_by_model_and_cue(df: pd.DataFrame) -> pd.DataFrame:
     return pivot[CUE_TYPES + ["overall"]].sort_values("overall", ascending=False)
 
 
+def accuracy_by_country(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute accuracy broken down by true country, aggregated across all models.
+
+    Args:
+        df: Combined results DataFrame.
+
+    Returns:
+        DataFrame with columns [true_country, accuracy, n_images].
+    """
+    grouped = df.groupby("true_country")["correct"].agg(["mean", "count"]).reset_index()
+    grouped.columns = ["true_country", "accuracy", "n_images"]
+    return grouped.sort_values("accuracy", ascending=False)
+
+
+def accuracy_by_model_and_country(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute accuracy broken down by model × true country.
+
+    Args:
+        df: Combined results DataFrame.
+
+    Returns:
+        Pivot table with models as rows and countries as columns.
+    """
+    grouped = df.groupby(["model", "true_country"])["correct"].mean().reset_index()
+    grouped.columns = ["model", "true_country", "accuracy"]
+    pivot = grouped.pivot(index="model", columns="true_country", values="accuracy")
+    pivot["overall"] = df.groupby("model")["correct"].mean()
+    return pivot.sort_values("overall", ascending=False)
+
+
 def accuracy_multicue(df: pd.DataFrame) -> pd.DataFrame:
     """
     Compute accuracy for multi-cue vs single-cue images, per model.
@@ -233,6 +265,13 @@ def print_accuracy_tables(df: pd.DataFrame) -> None:
     if not region_pivot.empty:
         print("\n--- Region-Level Accuracy: Model × Cue Type ---")
         print(region_pivot.map(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A").to_string())
+
+    print("\n--- Per-Country Accuracy (all models) ---")
+    print(accuracy_by_country(df).to_string(index=False, float_format="{:.1%}".format))
+
+    print("\n--- Accuracy by Model × Country ---")
+    country_pivot = accuracy_by_model_and_country(df)
+    print(country_pivot.map(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A").to_string())
 
     multicue = accuracy_multicue(df)
     if not multicue.empty:

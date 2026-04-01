@@ -88,6 +88,17 @@ COUNTRY_TO_REGION: dict[str, str] = {
     "Venezuela": "South America",
     "Vietnam": "Southeast Asia",
     "Zambia": "Sub-Saharan Africa",
+    "Argentina": "South America",
+    "Cameroon": "Sub-Saharan Africa",
+    "Croatia": "Southern Europe",
+    "Ireland": "Western Europe",
+    "Latvia": "Northern Europe",
+    "Lebanon": "Middle East",
+    "Mauritania": "North Africa",
+    "Mongolia": "East Asia",
+    "Morocco": "North Africa",
+    "Puerto Rico": "Caribbean",
+    "Tunisia": "North Africa",
 }
 
 COUNTRY_ALIASES: dict[str, str] = {
@@ -160,22 +171,24 @@ def parse_country(raw_response: str) -> str:
         logger.warning("Empty or non-string response received.")
         return "PARSE_ERROR"
 
+    # Search for COUNTRY: anywhere in the text (not just at the start of a line),
+    # since some models embed it mid-line.
+    match = re.search(r'COUNTRY:\s*(.+)', raw_response, re.IGNORECASE)
+    if match:
+        country_raw = match.group(1).strip()
+        if country_raw:
+            return _normalize_country(country_raw)
+
+    # Fallback: COUNTRY: on its own line with the value on the next line
     lines = raw_response.splitlines()
     for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.upper().startswith("COUNTRY:"):
-            country_raw = stripped[len("COUNTRY:"):].strip()
-            # If the country is on the next line (e.g. "COUNTRY:\nThailand")
-            if not country_raw:
-                for j in range(i + 1, len(lines)):
-                    next_line = lines[j].strip()
-                    if next_line:
-                        country_raw = next_line
-                        break
-            if not country_raw:
-                logger.warning("COUNTRY: line found but value is empty.")
-                return "PARSE_ERROR"
-            return _normalize_country(country_raw)
+        if line.strip().upper() == "COUNTRY:":
+            for j in range(i + 1, len(lines)):
+                next_line = lines[j].strip()
+                if next_line:
+                    return _normalize_country(next_line)
+            logger.warning("COUNTRY: line found but value is empty.")
+            return "PARSE_ERROR"
 
     logger.warning("No COUNTRY: line found in response.")
     return "PARSE_ERROR"

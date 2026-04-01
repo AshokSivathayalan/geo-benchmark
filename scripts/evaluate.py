@@ -43,16 +43,19 @@ REASONING: <your step-by-step analysis>
 COUNTRY: <single country name only>"""
 
 SUPPORTED_MODELS = {
-    "claude": "claude-haiku-4-5",
-    "gpt4o": "gpt-4o-mini",
-    "gemini": "gemini-2.5-flash",
-    "opus": "claude-opus-4-6"
+    "claude-haiku": "claude-haiku-4-5",
+    "gpt-4omini": "gpt-4o-mini",
+    "gemini-2.5flash": "gemini-2.5-flash",
+    "claude-sonnet": "claude-sonnet-4-6",
+    "gemini-3flash": "gemini-3-flash-preview",
+    "gpt-5.4mini": "gpt-5.4-mini"
 }
 
 # Minimum seconds between requests per model (to respect rate limits)
 RATE_LIMITS = {
-    "gemini": 12.0,  # 5 RPM = 12s between requests
-    "gpt4o": 5.0,    # avoid exceeding TPM limit
+    "gemini-2.5flash": 12.0,  # 5 RPM = 12s between requests
+    "gemini-3flash": 12.0,
+    "gpt-4omini": 5.0,        # avoid exceeding TPM limit
 }
 
 RESULTS_FIELDNAMES = [
@@ -169,9 +172,11 @@ def call_gpt4o(image_b64: str, model_id: str, max_retries: int = 3) -> str:
 
     for attempt in range(1, max_retries + 1):
         try:
+            # Newer OpenAI models require max_completion_tokens instead of max_tokens
+            token_param = "max_completion_tokens" if "5.4" in model_id else "max_tokens"
             response = client.chat.completions.create(
                 model=model_id,
-                max_tokens=1024,
+                **{token_param: 1024},
                 messages=[
                     {
                         "role": "user",
@@ -260,11 +265,11 @@ def query_model(model_key: str, image_b64: str) -> str:
         Raw text response from the model.
     """
     model_id = SUPPORTED_MODELS[model_key]
-    if model_key in ("claude", "opus"):
+    if model_key in ("claude-haiku", "claude-sonnet"):
         return call_claude(image_b64, model_id)
-    elif model_key == "gpt4o":
+    elif model_key in ("gpt-4omini", "gpt-5.4mini"):
         return call_gpt4o(image_b64, model_id)
-    elif model_key == "gemini":
+    elif model_key in ("gemini-2.5flash", "gemini-3flash"):
         return call_gemini(image_b64, model_id)
     else:
         raise ValueError(f"Unsupported model key: {model_key}")
@@ -401,7 +406,11 @@ def estimate_cost(model_key: str, num_images: int) -> None:
         model_key: Model being evaluated.
         num_images: Total number of images to be processed.
     """
-    cost_per_image = {"claude": 0.02, "gpt4o": 0.02, "gemini": 0.001}
+    cost_per_image = {
+        "claude-haiku": 0.02, "claude-sonnet": 0.05,
+        "gpt-4omini": 0.02, "gpt-5.4mini": 0.03,
+        "gemini-2.5flash": 0.001, "gemini-3flash": 0.001,
+    }
     estimate = cost_per_image.get(model_key, 0.02) * num_images
     print(f"Estimated cost for {num_images} images with '{model_key}': ~${estimate:.2f}")
     print("(Run with --pilot 10 first to verify before a full run.)")
