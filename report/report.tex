@@ -3,6 +3,7 @@
 \usepackage{jmlr2e}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{subcaption}
 \graphicspath{{../figures/}}
 
 \newcommand{\benchmark}{\textsc{GeoClue}}
@@ -113,6 +114,32 @@ A subset of 42 images was additionally annotated as \emph{multi-cue}, indicating
 
 The annotation was performed by the authors, both experienced GeoGuessr players. While this limits scalability, it ensures that the cue type label reflects the annotator's judgment about what a human would rely on to geolocate the image, rather than an automated or proxy signal.
 
+\begin{figure}[t]
+\centering
+\begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{example_linguistic.jpg}
+    \caption{Linguistic (Thailand)}
+    \label{fig:ex-ling}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{example_environmental.jpg}
+    \caption{Environmental (Indonesia)}
+    \label{fig:ex-env}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{example_infrastructure.jpg}
+    \caption{Infrastructure (Finland)}
+    \label{fig:ex-infra}
+\end{subfigure}
+\caption{Example images from \benchmark{}, one per cue type. (a)~Thai script on a government sign provides a linguistic cue. (b)~Tropical trees and brush provide an environmental cue (c)~Buildings and distinct road signs provide infrastructural information}
+\label{fig:examples}
+\end{figure}
+
 \subsection{Evaluation Protocol}
 
 All models receive the same zero-shot prompt instructing them to (1)~describe geographic cues visible in the image, (2)~reason step by step, and (3)~output a final country prediction in a structured format. The prompt is:
@@ -160,19 +187,20 @@ By evaluating two models per provider, we can observe both cross-provider and wi
 Table~\ref{tab:overall} reports country-level and region-level accuracy for each model across all 246 images. Gemini 3 Flash achieves the highest country-level accuracy at 93.9\%, followed closely by Gemini 2.5 Flash at 92.3\%. Claude Sonnet 4.6 and GPT-4o-mini form a middle cluster (83.3\% and 81.3\%), while GPT-5.4-mini (75.2\%) and Claude Haiku 4.5 (65.4\%) trail behind. Region-level accuracy, which gives partial credit when the predicted country is in the correct geographic region, is notably higher than country-level accuracy for all models (up to 10.2 percentage points for Claude Haiku 4.5), indicating that a substantial fraction of errors are near-misses where the model identifies the correct region but confuses neighboring or culturally similar countries.
 
 \begin{table}[t]
-\caption{Overall accuracy by model. Country-level accuracy requires an exact country match; region-level accuracy requires only that the predicted country falls in the correct geographic region.}
+\caption{Overall accuracy (\%) by model. Country and region columns use all 246 images; single-cue and multi-cue columns report country-level accuracy on each subset.}
 \label{tab:overall}
 \centering
-\begin{tabular}{lcc}
+\small
+\begin{tabular}{lcccc}
 \toprule
-\textbf{Model} & \textbf{Country Acc.} & \textbf{Region Acc.} \\
+\textbf{Model} & \textbf{Country} & \textbf{Region} & \textbf{Single-Cue} & \textbf{Multi-Cue} \\
 \midrule
-Gemini 3 Flash     & 93.9\% & 95.5\% \\
-Gemini 2.5 Flash   & 92.3\% & 95.9\% \\
-Claude Sonnet 4.6  & 83.3\% & 89.8\% \\
-GPT-4o-mini        & 81.3\% & 89.4\% \\
-GPT-5.4-mini       & 75.2\% & 85.0\% \\
-Claude Haiku 4.5   & 65.4\% & 75.6\% \\
+Gemini 3 Flash     & 93.9 & 95.5 & 93.6 & 95.3 \\
+Gemini 2.5 Flash   & 92.3 & 95.9 & 92.1 & 93.0 \\
+Claude Sonnet 4.6  & 83.3 & 89.8 & 84.2 & 79.1 \\
+GPT-4o-mini        & 81.3 & 89.4 & 79.3 & 90.7 \\
+GPT-5.4-mini       & 75.2 & 85.0 & 75.4 & 74.4 \\
+Claude Haiku 4.5   & 65.4 & 75.6 & 65.0 & 67.4 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -184,9 +212,10 @@ Table~\ref{tab:main} presents the main result: accuracy broken down by model and
 Linguistic cues are the easiest category for all models, with accuracy ranging from 87.0\% (Claude Haiku 4.5) to 100.0\% (Gemini 3 Flash and Claude Sonnet 4.6). Infrastructure cues show the widest spread across models: both Gemini models achieve 98.6\%, while Claude Haiku 4.5 drops to 65.2\%. Environmental cues are the hardest category for every model, with accuracy ranging from 41.5\% to 81.5\%.
 
 \begin{table}[t]
-\caption{Country-level accuracy (\%) by model and cue type (single-cue images only). The overall column reports accuracy across all single-cue images for each model.}
+\caption{Country-level accuracy (\%) by model and cue type (single-cue images only).}
 \label{tab:main}
 \centering
+\small
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Model} & \textbf{Linguistic} & \textbf{Environmental} & \textbf{Infrastructure} & \textbf{Overall} \\
@@ -212,25 +241,7 @@ All models         & 96.4 & 61.8 & 85.5 & 81.6 \\
 
 \subsection{Multi-Cue vs.\ Single-Cue}
 
-Table~\ref{tab:multicue} compares accuracy on single-cue images (204 per model) versus multi-cue images (42 per model). Most models perform better on multi-cue images, with the gap being most pronounced for GPT-4o-mini (+11.4 percentage points). However, two models---Claude Sonnet 4.6 and GPT-5.4-mini---perform slightly worse on multi-cue images, suggesting that redundant cues do not uniformly help and may occasionally introduce conflicting signals.
-
-\begin{table}[t]
-\caption{Country-level accuracy (\%) on single-cue vs.\ multi-cue images.}
-\label{tab:multicue}
-\centering
-\begin{tabular}{lcc}
-\toprule
-\textbf{Model} & \textbf{Single-Cue} & \textbf{Multi-Cue} \\
-\midrule
-Gemini 3 Flash     & 93.6 & 95.3 \\
-Gemini 2.5 Flash   & 92.1 & 93.0 \\
-Claude Sonnet 4.6  & 84.2 & 79.1 \\
-GPT-4o-mini        & 79.3 & 90.7 \\
-GPT-5.4-mini       & 75.4 & 74.4 \\
-Claude Haiku 4.5   & 65.0 & 67.4 \\
-\bottomrule
-\end{tabular}
-\end{table}
+The rightmost columns of Table~\ref{tab:overall} compare accuracy on single-cue images (204 per model) versus multi-cue images (42 per model). Most models perform better on multi-cue images, with the gap being most pronounced for GPT-4o-mini (+11.4 percentage points). However, two models---Claude Sonnet 4.6 and GPT-5.4-mini---perform slightly worse on multi-cue images, suggesting that redundant cues do not uniformly help and may occasionally introduce conflicting signals.
 
 \section{Discussion}
 \label{sec:discussion}
@@ -241,7 +252,7 @@ Infrastructure cues (road markings, driving side, vehicle types) occupy a middle
 
 Region-level accuracy is substantially higher than country-level accuracy for all models (Table~\ref{tab:overall}), with gaps ranging from 1.6 percentage points (Gemini 3 Flash) to 10.2 percentage points (Claude Haiku 4.5). This indicates that a significant fraction of country-level errors are near-misses where the model correctly identifies the geographic region but confuses countries within it. The effect is largest for the weaker models, suggesting that regional reasoning develops before precise country discrimination.
 
-Most models perform better on multi-cue images (Table~\ref{tab:multicue}), with the effect strongest for GPT-4o-mini (+11.4 percentage points), suggesting that redundant cue types provide additional signal. However, Claude Sonnet 4.6 and GPT-5.4-mini perform slightly worse on multi-cue images, indicating that the benefit of redundant cues is not universal and may depend on how a model integrates competing signals. With only 42 multi-cue images per model, these differences may not be statistically significant.
+Most models perform better on multi-cue images (Table~\ref{tab:overall}), with the effect strongest for GPT-4o-mini (+11.4 percentage points), suggesting that redundant cue types provide additional signal. However, Claude Sonnet 4.6 and GPT-5.4-mini perform slightly worse on multi-cue images, indicating that the benefit of redundant cues is not universal and may depend on how a model integrates competing signals. With only 42 multi-cue images per model, these differences may not be statistically significant.
 
 Upgrading to a newer model within the same provider family did not uniformly improve performance. While Claude Sonnet 4.6 and Gemini 3 Flash outperformed their lightweight counterparts, Claude Haiku 4.5 and Gemini 2.5 Flash respectively, GPT-5.4-mini performed worse than GPT-4o-mini. This indicates that geographic reasoning does not necessarily improve with newer or more capable models, highlighting the value of a benchmark specifically designed to measure it.
 
